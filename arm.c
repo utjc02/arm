@@ -1,5 +1,7 @@
-#define MOTOR_0 0
-#define MOTOR_1 1
+#define MOTOR_J 1
+#define MOTOR_H 2
+#define MOTOR_V 3
+#define MOTOR_R 4
 
 #define DIR_LOOSE 1
 #define DIR_TIGHT 2
@@ -65,12 +67,12 @@ int pinCS[2] = {2, 3};
 
 
 // CurrentSensorMatrix Format Example:
-// motorCurrentMax[4] = {MOTOR_0__DIR_LOOSE,  MOTOR_0__DIR_TIGHT, MOTOR_1__DIR_BACK,  MOTOR_1__DIR_FRWD};
+// motorCurrentMax[4] = {MOTOR_J__DIR_LOOSE,  MOTOR_J__DIR_TIGHT, MOTOR_H__DIR_BACK,  MOTOR_H__DIR_FRWD};
 
 int motorCurrentMax[4] = {50, 50, 31, 61};
 
 // SpeedMatrix Format Example:
-// motorSpeedStart[4] = {MOTOR_0__DIR_LOOSE, MOTOR_0__DIR_TIGHT,  MOTOR_1__DIR_BACK,  MOTOR_1__DIR_FRWD};
+// motorSpeedStart[4] = {MOTOR_J__DIR_LOOSE, MOTOR_J__DIR_TIGHT,  MOTOR_H__DIR_BACK,  MOTOR_H__DIR_FRWD};
 
 int motorSpeedStart[4] = { 80,  80, 70,  60};
 int motorSpeedMax[4] =   {120, 120, 105, 70};
@@ -185,10 +187,10 @@ void setup()
   initMotor1();
   
   sensorIRValue = digitalRead(pinIR);
-  motorSpeed = motorSpeedStart[2*MOTOR_1+1];
+  motorSpeed = motorSpeedStart[2*MOTOR_H+1];
 
 
-  // **** MOTOR_1 FRWD ****
+  // **** MOTOR_H FRWD ****
   Serial.println("START MOTOR FORWARD");
   while (sensorIRValue == IR_EMPTY)
   {      
@@ -196,7 +198,7 @@ void setup()
     Serial.print(F("  IR = "));
     Serial.print(sensorIRValue);   
     
-    motorCurrentSensorValue = analogRead(pinCS[MOTOR_1]);
+    motorCurrentSensorValue = analogRead(pinCS[MOTOR_H]);
     
     if (mpuInterrupt && flagStartPosition)
     {
@@ -210,13 +212,13 @@ void setup()
         }
     }
     
-    motorRun(MOTOR_1, DIR_FRWD, motorSpeed);
+    motorRun(MOTOR_H, DIR_FRWD, motorSpeed);
     
-    if (flagStart && (motorSpeed < motorSpeedMax[2*MOTOR_1+1]))
+    if (flagStart && (motorSpeed < motorSpeedMax[2*MOTOR_H+1]))
       motorSpeed++;
     else
     {
-      motorSpeed = motorSpeedMin[2*MOTOR_1+1];
+      motorSpeed = motorSpeedMin[2*MOTOR_H+1];
       flagStart = false;
     }     
   }
@@ -230,28 +232,28 @@ void setup()
       Serial.println(endMPUGyroZ);
      }
     
-  motorOff(MOTOR_1, STOP_REASON_SENS_IR); 
+  motorOff(MOTOR_H, STOP_REASON_SENS_IR); 
   
-  // **** MOTOR_0 TIGHT ****
-  Serial.println(F("START MOTOR_0 TIGHT")); 
-  motorCurrentSensorValue = analogRead(pinCS[MOTOR_0]);
-  motorSpeed = motorSpeedStart[2*MOTOR_0+1];
+  // **** MOTOR_J TIGHT ****
+  Serial.println(F("START MOTOR_J TIGHT")); 
+  motorCurrentSensorValue = analogRead(pinCS[MOTOR_J]);
+  motorSpeed = motorSpeedStart[2*MOTOR_J+1];
   flagStart = true;
-  while (motorCurrentSensorValue < motorCurrentMax[2*MOTOR_0+1])
+  while (motorCurrentSensorValue < motorCurrentMax[2*MOTOR_J+1])
   {      
 
-    motorCurrentSensorValue = motorRun(MOTOR_0, DIR_TIGHT, motorSpeed);
+    motorCurrentSensorValue = motorRun(MOTOR_J, DIR_TIGHT, motorSpeed);
    
-    if (flagStart && (motorSpeed < motorSpeedMax[2*MOTOR_0+1]))
+    if (flagStart && (motorSpeed < motorSpeedMax[2*MOTOR_J+1]))
       motorSpeed++;
     else
     {
-      motorSpeed = motorSpeedMin[2*MOTOR_0+1];
+      motorSpeed = motorSpeedMin[2*MOTOR_J+1];
       flagStart = false;
     }
   }
   
-  motorOff(MOTOR_0, STOP_REASON_BLOCK); 
+  motorOff(MOTOR_J, STOP_REASON_BLOCK); 
 
   // CALCULATE Thresholds
   absTreshold = (startMPUGyroZ - endMPUGyroZ) * PRECISON;
@@ -270,9 +272,9 @@ void setup()
 
  delay(500);    
   
-  // **** MOTOR_1 BACK with SUBJECT****
-  Serial.println(F("START MOTOR_1 BACK with SUBJECT"));
-  motorSpeed = motorSpeedStart[2*MOTOR_1];
+  // **** MOTOR_H BACK with SUBJECT****
+  Serial.println(F("START MOTOR_H BACK with SUBJECT"));
+  motorSpeed = motorSpeedStart[2*MOTOR_H];
   flagStart = true;
   while (!startPosition)
   {
@@ -287,22 +289,22 @@ void setup()
      }
     else
     {
-     motorCurrentSensorValue = motorRun(MOTOR_1, DIR_BACK, motorSpeed); 
-     if (flagStart && (motorSpeed < motorSpeedMax[2*MOTOR_1]))
+     motorCurrentSensorValue = motorRun(MOTOR_H, DIR_BACK, motorSpeed); 
+     if (flagStart && (motorSpeed < motorSpeedMax[2*MOTOR_H]))
        motorSpeed++;
      else
      {
-      motorSpeed = motorSpeedMin[2*MOTOR_1];
+      motorSpeed = motorSpeedMin[2*MOTOR_H];
       flagStart = false;
      }
     } 
   }
     
-  motorOff(MOTOR_1, STOP_REASON_GYRO); 
+  motorOff(MOTOR_H, STOP_REASON_GYRO); 
 
-  // **** MOTOR_1 FRWD with SUBJECT ****
-  Serial.println(F("START MOTOR_1 FRWD with SUBJECT"));
-  motorSpeed = motorSpeedStart[2*MOTOR_1+1];
+  // **** MOTOR_H FRWD with SUBJECT ****
+  Serial.println(F("START MOTOR_H FRWD with SUBJECT"));
+  motorSpeed = motorSpeedStart[2*MOTOR_H+1];
   flagStart = true;
   while (!endPosition)
   {
@@ -317,31 +319,31 @@ void setup()
      }
     else
     {
-     motorCurrentSensorValue = motorRun(MOTOR_1, DIR_FRWD, motorSpeed); 
-     if (flagStart && (motorSpeed < motorSpeedMax[2*MOTOR_1+1]))
+     motorCurrentSensorValue = motorRun(MOTOR_H, DIR_FRWD, motorSpeed); 
+     if (flagStart && (motorSpeed < motorSpeedMax[2*MOTOR_H+1]))
        motorSpeed++;
      else
      {
-      motorSpeed = motorSpeedMin[2*MOTOR_1+1];
+      motorSpeed = motorSpeedMin[2*MOTOR_H+1];
       flagStart = false;
      }
     } 
   }
   
-  motorOff(MOTOR_1, STOP_REASON_GYRO); 
+  motorOff(MOTOR_H, STOP_REASON_GYRO); 
 
 
-  // **** MOTOR_0 LOOSE ****
-  Serial.println(F("START MOTOR_0 LOOSE"));
+  // **** MOTOR_J LOOSE ****
+  Serial.println(F("START MOTOR_J LOOSE"));
   
-  if (motorRunTime(MOTOR_0, DIR_LOOSE, 20) == STOP_REASON_BLOCK)
-    motorOff(MOTOR_0, STOP_REASON_BLOCK);
+  if (motorRunTime(MOTOR_J, DIR_LOOSE, 20) == STOP_REASON_BLOCK)
+    motorOff(MOTOR_J, STOP_REASON_BLOCK);
   else  
-    motorOff(MOTOR_0, STOP_REASON_TIME);
+    motorOff(MOTOR_J, STOP_REASON_TIME);
 
 
-  // MOTOR_1 BACK
-  Serial.println(F("START MOTOR_1 BACK EMPTY"));
+  // MOTOR_H BACK
+  Serial.println(F("START MOTOR_H BACK EMPTY"));
   startPosition = false;
   while (!startPosition)
   {
@@ -356,11 +358,11 @@ void setup()
      }
     else
     {
-     motorRun(MOTOR_1, DIR_BACK, 70);
+     motorRun(MOTOR_H, DIR_BACK, 70);
     } 
   }
   
-  motorOff(MOTOR_1, STOP_REASON_GYRO); 
+  motorOff(MOTOR_H, STOP_REASON_GYRO); 
 
    Serial.println(F("FINISH"));
   delay(30000);
@@ -378,19 +380,19 @@ void initMotor0()
   uint8_t motorCurrentSensorValue = 0;
   uint8_t motorSpeed;
   
-  Serial.println(F("INIT MOTOR_0")); 
-  motorSpeed = motorSpeedStart[2*MOTOR_0];
+  Serial.println(F("INIT MOTOR_J")); 
+  motorSpeed = motorSpeedStart[2*MOTOR_J];
   
-  while (motorCurrentSensorValue < motorCurrentMax[2*MOTOR_0])
+  while (motorCurrentSensorValue < motorCurrentMax[2*MOTOR_J])
   {      
-    motorCurrentSensorValue = motorRun(MOTOR_0, DIR_LOOSE, motorSpeed); 
+    motorCurrentSensorValue = motorRun(MOTOR_J, DIR_LOOSE, motorSpeed); 
   }
-  motorOff(MOTOR_0, STOP_REASON_BLOCK); 
+  motorOff(MOTOR_J, STOP_REASON_BLOCK); 
 
-  motorRunTime(MOTOR_0, DIR_TIGHT, 40);
-  motorOff(MOTOR_0, STOP_REASON_TIME); 
+  motorRunTime(MOTOR_J, DIR_TIGHT, 40);
+  motorOff(MOTOR_J, STOP_REASON_TIME); 
 
-  Serial.print("DONE INIT MOTOR_0 ");
+  Serial.print("DONE INIT MOTOR_J ");
   delay(200);   
 }
 
@@ -400,7 +402,7 @@ void initMotor1()
   uint8_t motorSpeed;
   boolean startPosition = false;
    
-  Serial.println(F("INIT MOTOR_1"));
+  Serial.println(F("INIT MOTOR_H"));
 
   while (!startPosition)
   {
@@ -415,13 +417,13 @@ void initMotor1()
      }
     else
     { 
-     motorRun(MOTOR_1, DIR_BACK, motorSpeedStart[2*MOTOR_1]);
+     motorRun(MOTOR_H, DIR_BACK, motorSpeedStart[2*MOTOR_H]);
     } 
   }
   
-  motorOff(MOTOR_1, STOP_REASON_GYRO); 
+  motorOff(MOTOR_H, STOP_REASON_GYRO); 
 
-  Serial.print("DONE INIT MOTOR_1");
+  Serial.print("DONE INIT MOTOR_H");
   delay(1000);   
 }
 
